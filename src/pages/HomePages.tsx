@@ -22,7 +22,7 @@ const HomePages = () => {
         fetchPizzas();
       }, []);
 
-    const handleRemovePizza = (id: number) => {
+    const handleRemovePizza = (id: string) => {
         console.log(id);
         const newPizzas = pizzas.filter(pizza => pizza.id !== id)
         setPizzas(newPizzas)

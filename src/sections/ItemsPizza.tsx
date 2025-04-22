@@ -16,7 +16,7 @@ const ItemsPizza = ({
             <h1>{name}</h1>
             <p>{desc}</p>
             <button className="px-4 py-2 text-white bg-blue-500 rounded-md" onClick={() => handleChangePerson({
-                id: 1,
+                id: id,
                 name: 'Kim Nguyên nè',
                 desc: 'Hoc react',
                 price: 100000

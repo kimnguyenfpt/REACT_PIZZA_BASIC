@@ -2,7 +2,7 @@ import { TrashIcon } from '@heroicons/react/24/solid';
 import Pizza from '../models/Pizzza.model';
 
 type Props = Pizza & {
-  handleRemovePizza: (id: number) => void;
+  handleRemovePizza: (id: string) => void;
 };
 
 const CardPizza = ({ name, desc, img, id, price, handleRemovePizza }: Props & { price: number }) => {

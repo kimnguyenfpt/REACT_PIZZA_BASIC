@@ -3,7 +3,7 @@ import Pizza from '../models/Pizzza.model';
 
 const ProductContext = createContext<{
     pizzas: Pizza[];
-    removePizza: (id: number) => void;
+    removePizza: (id: string) => void;
 }>({
     pizzas: [],
     removePizza: () => {},
@@ -14,7 +14,7 @@ export const useProduct = () => useContext(ProductContext);
 export const ProductProvider = ({ children }: { children: ReactNode }) => {
     const [pizzas, setPizzas] = useState<Pizza[]>([]);
 
-    const removePizza = (id: number) => {
+    const removePizza = (id: string) => {
         setPizzas(prev => prev.filter(pizza => pizza.id !== id));
     };
 

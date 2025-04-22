@@ -5,9 +5,9 @@ export const ADD_PIZZA = 'ADD_PIZZA';
 export const UPDATE_PIZZA = 'UPDATE_PIZZA';
 export const REMOVE_PIZZA = 'REMOVE_PIZZA';
 
-export const getPizzas = (data: Pizza[]) => ({
+export const getPizzas = (pizza: Pizza[]) => ({
   type: GET_PIZZA,
-  payload: data,
+  payload: pizza,
 });
 
 export const addPizza = (pizza: Pizza) => ({
@@ -20,7 +20,7 @@ export const updatePizza = (pizza: Pizza) => ({
   payload: pizza,
 });
 
-export const removePizza = (id: number) => ({
+export const removePizza = (id: string) => ({
   type: REMOVE_PIZZA,
   payload: id,
 });

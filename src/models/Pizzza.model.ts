@@ -1,5 +1,5 @@
 type Pizza = {
-    id: number
+    id: string
     name: string;
     desc: string;
     img?: string;

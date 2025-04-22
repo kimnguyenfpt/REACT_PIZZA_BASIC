@@ -9,6 +9,7 @@ import { addPizza, updatePizza, removePizza } from '../redux/actions/productActi
 import { addPizza as addPizzaAPI, getPizzas, deletePizza as deletePizzaAPI } from '../service/productService';
 import { updatePizza as updatePizzaAPI } from '../service/productService';
 import DeleteModal from '../modal/DeleteModal';
+import { v4 as uuidv4 } from 'uuid';
 
 const ManageProductsPage = () => {
   
@@ -18,7 +19,7 @@ const ManageProductsPage = () => {
   const [editing, setEditing] = useState<Pizza | null>(null);
   const [adding, setAdding] = useState(false);
   const [deleting, setDeleting] = useState<Pizza | null>(null);
-  const [newPizza, setNewPizza] = useState<Pizza>({ id: 0, name: '', desc: '', img: '', price: 0 });
+  const [newPizza, setNewPizza] = useState<Pizza>({ id: uuidv4(), name: '', desc: '', img: '', price: 0 });
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchPizzas = async () => {
@@ -40,17 +41,17 @@ const ManageProductsPage = () => {
   const handleDeleteConfirm = async () => {
     if (deleting) {
       try {
-        await deletePizzaAPI(deleting.id);
+        await deletePizzaAPI(deleting.id); // ID là string (UUID)
         dispatch(removePizza(deleting.id));
         console.log('🗑️ Đã xoá sản phẩm:', deleting);
         setDeleting(null);
-        // Lấy lại danh sách sau khi xóa
-        fetchPizzas();
+        fetchPizzas(); // Làm mới danh sách
       } catch (error) {
         console.error('❌ Lỗi khi xóa sản phẩm:', error);
       }
     }
   };
+  
   
   const handleUpdate = async (pizza: Pizza) => {
     try {
@@ -67,16 +68,17 @@ const ManageProductsPage = () => {
 
   const handleAdd = async (pizza: Pizza) => {
     try {
-      const res = await addPizzaAPI(pizza); // Gọi API POST
-      dispatch(addPizza(res.data)); // Dispatch để cập nhật Redux
+      const pizzaWithId = { ...pizza, id: uuidv4() }; // 👈 thêm UUID
+      const res = await addPizzaAPI(pizzaWithId);
+      dispatch(addPizza(res.data));
       console.log('✅ Thêm sản phẩm thành công:', res.data);
       setAdding(false);
-      // Lấy lại danh sách sau khi thêm
       fetchPizzas();
     } catch (error) {
       console.error('❌ Lỗi khi thêm sản phẩm:', error);
     }
   };
+  
   
 
   return (

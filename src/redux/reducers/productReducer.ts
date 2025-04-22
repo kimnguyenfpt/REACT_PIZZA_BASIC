@@ -18,7 +18,6 @@ const productReducer = (state = initialState, action: any): ProductState => {
   switch (action.type) {
     case GET_PIZZA:
       return { ...state, pizzas: action.payload };
-
     case ADD_PIZZA:
       return { ...state, pizzas: [...state.pizzas, action.payload] };
     case UPDATE_PIZZA:
