@@ -1,8 +1,6 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import Pizza from '../models/Pizzza.model';
 import { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
 import { getCategories } from '../service/categoryService';
 import Category from '../models/Category.model';
 

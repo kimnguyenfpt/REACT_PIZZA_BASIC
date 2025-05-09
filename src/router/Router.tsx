@@ -6,6 +6,10 @@ import CreatePizzaPage from '../pages/CreatePizzaPage';
 import ManageProductsPage from '../ManageProduct/ManageProductsPage';
 import ManageCategoriesPage from '../ManageCategory/ManageCategoriesPage';
 import ManagerLayout from '../layouts/ManagerLayout/ManagerLayout';
+import CategoriesPage from '../pages/CategoriesPage';
+import LoginForm from '../auth/login/Login';
+import RegisterForm from '../auth/register/Register';
+import ProtectedRoute from './ProtectedRoute';
 
 const Layout = () => (
   <div>
@@ -24,22 +28,36 @@ const Router = () => {
         { index: true, 
           element: <HomePages /> 
         },
-        { path: 'create-pizza', 
-          element: <CreatePizzaPage /> 
+        { path: 'categories', 
+          element: <CategoriesPage /> 
         },
-
+        { path: 'login', 
+          element: <LoginForm /> 
+        },
+        { path: 'register', 
+          element: <RegisterForm /> 
+        },
         {
-          path: 'manager',
-          element: <ManagerLayout />,
+          path: '',
+          element: <ProtectedRoute />,
           children: [
-            { path: 'products', 
-              element: <ManageProductsPage /> 
+            { path: 'create-pizza', 
+              element: <CreatePizzaPage /> 
             },
-            { path: 'categories', 
-              element: <ManageCategoriesPage /> 
-            },
-            { index: true, 
-              element: <div>📌 Chọn chức năng bên trái để quản lý</div> 
+            {
+              path: 'manager',
+              element: <ManagerLayout />,
+              children: [
+                { path: 'products', 
+                  element: <ManageProductsPage /> 
+                },
+                { path: 'categories', 
+                  element: <ManageCategoriesPage /> 
+                },
+                { index: true, 
+                  element: <div>📌 Chọn chức năng bên trái để quản lý</div> 
+                }
+              ]
             }
           ]
         }
