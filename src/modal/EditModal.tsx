@@ -1,6 +1,10 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import Pizza from '../models/Pizzza.model';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
+import { getCategories } from '../service/categoryService';
+import Category from '../models/Category.model';
 
 type Props = {
   pizza: Pizza;
@@ -10,6 +14,24 @@ type Props = {
 
 const EditModal = ({ pizza, onClose, onSave }: Props) => {
   const [editedPizza, setEditedPizza] = useState<Pizza>({...pizza});
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(false);
+  
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true);
+        const res = await getCategories();
+        setCategories(res.data);
+      } catch (error) {
+        console.error('❌ Lỗi khi lấy danh mục:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchCategories();
+  }, []);
   
   const handleChange = (key: keyof Pizza, value: string | number) => {
     setEditedPizza(prev => ({ ...prev, [key]: value }));
@@ -48,6 +70,26 @@ const EditModal = ({ pizza, onClose, onSave }: Props) => {
           className="w-full p-2 rounded border dark:bg-[#1e1e1e] dark:text-white"
           placeholder="Giá"
         />
+        
+        <div>
+          <label className="block mb-1 text-sm font-medium text-gray-900 dark:text-white">
+            Danh mục
+          </label>
+          <select
+            value={editedPizza.categoryId || ''}
+            onChange={e => handleChange('categoryId', e.target.value)}
+            className="w-full p-2 rounded border dark:bg-[#1e1e1e] dark:text-white"
+            disabled={loading}
+          >
+            <option value="">-- Chọn danh mục --</option>
+            {categories.filter(cat => cat.active).map(category => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
+        
         <button
           onClick={handleSave}
           className="w-full py-2 mt-2 text-white bg-blue-600 rounded hover:bg-blue-700"

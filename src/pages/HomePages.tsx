@@ -1,33 +1,31 @@
-import pizzaImg from '../assets/img/pizza.png';
-import pizzaImg2 from '../assets/img/pizza-hai-san.png';
-import CardPizza from '../sections/CardPizza';
-import { useEffect, useState } from 'react';
-import Pizza from '../models/Pizzza.model';
-import {getPizzas} from '../service/productService'
 
+import CardPizza from '../sections/CardPizza';
+import { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { RootState } from '../redux/store';
+import { getPizzas as getPizzasAction, removePizza } from '../redux/actions/productActions';
+import { getPizzas } from '../service/productService';
 
 const HomePages = () => {
-
-    const[pizzas, setPizzas]  = useState<Pizza[]>([]);
+    const dispatch = useDispatch();
+    const pizzas = useSelector((state: RootState) => state.product.pizzas);
 
     useEffect(() => {
         const fetchPizzas = async () => {
-          try {
-            const res = await getPizzas();
-            setPizzas(res.data);
-          } catch (err) {
-            console.error('❌ Lỗi khi gọi API:', err);
-          }
+            try {
+                const res = await getPizzas();
+                dispatch(getPizzasAction(res.data));
+            } catch (err) {
+                console.error('❌ Lỗi khi gọi API:', err);
+            }
         };
         fetchPizzas();
-      }, []);
+    }, [dispatch]);
 
     const handleRemovePizza = (id: string) => {
         console.log(id);
-        const newPizzas = pizzas.filter(pizza => pizza.id !== id)
-        setPizzas(newPizzas)
+        dispatch(removePizza(id));
     }
-
 
     return (
         <div className="min-h-[calc(100vh-200px)] p-4 sm:p-6 lg:p-10 overflow-auto">
@@ -42,6 +40,5 @@ const HomePages = () => {
         </div>
     );
 };
-
 
 export default HomePages;

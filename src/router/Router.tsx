@@ -4,7 +4,7 @@ import Footer from '../layouts/footer/Footer';
 import HomePages from '../pages/HomePages';
 import CreatePizzaPage from '../pages/CreatePizzaPage';
 import ManageProductsPage from '../ManageProduct/ManageProductsPage';
-import ManageCategoriesPage from '../ManageCategory/ManageCategories';
+import ManageCategoriesPage from '../ManageCategory/ManageCategoriesPage';
 import ManagerLayout from '../layouts/ManagerLayout/ManagerLayout';
 
 const Layout = () => (
