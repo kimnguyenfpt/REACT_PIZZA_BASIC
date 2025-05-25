@@ -1,9 +1,113 @@
-import axios from 'axios';
-import Pizza from '../models/Pizzza.model';
+import api from './apiInterceptors';
+import Product from '../models/Product.model';
 
-const BASE_URL = 'https://68075345e81df7060eb9b8af.mockapi.io/products';
+// Lấy danh sách pizza
+export const getProducts = async () => {
+  try {
+    const response = await api.get<Product[]>('/products');
+    return { data: response.data, success: true };
+  } catch (error: any) {
+    return { 
+      success: false, 
+      data: [],
+      message: error.response?.data?.message || 'Không thể lấy danh sách sản phẩm' 
+    };
+  }
+};
 
-export const getPizzas = () => axios.get<Pizza[]>(BASE_URL);
-export const addPizza = (pizza: Omit<Pizza, 'id'>) => axios.post(BASE_URL, pizza);
-export const updatePizza = (pizza: Pizza) => axios.put(`${BASE_URL}/${pizza.id}`, pizza);
-export const deletePizza = (id: string) => axios.delete(`${BASE_URL}/${id}`);
+// Lấy pizza theo ID
+export const getPizzaById = async (id: string) => {
+  try {
+    const response = await api.get<Product>(`/products/${id}`);
+    return { data: response.data, success: true };
+  } catch (error: any) {
+    return { 
+      success: false, 
+      message: error.response?.data?.message || 'Không thể lấy thông tin sản phẩm' 
+    };
+  }
+};
+
+// Thêm pizza mới
+export const addProduct = async (product: Omit<Product, 'id'>) => {
+  try {
+    const response = await api.post<Product>('/products', product);
+    return { data: response.data, success: true };
+  } catch (error: any) {
+    return { 
+      success: false, 
+      message: error.response?.data?.message || 'Không thể thêm sản phẩm mới' 
+    };
+  }
+};
+
+// Cập nhật pizza
+export const updateProduct = async (product: Product) => {
+  try {
+    const response = await api.put<Product>(`/products/${product.id}`, product);
+    return { data: response.data, success: true };
+  } catch (error: any) {
+    return { 
+      success: false, 
+      message: error.response?.data?.message || 'Không thể cập nhật sản phẩm' 
+    };
+  }
+};
+
+// Xoá pizza
+export const deleteProduct = async (id: string) => {
+  try {
+    await api.delete(`/products/${id}`);
+    return { success: true };
+  } catch (error: any) {
+    return { 
+      success: false, 
+      message: error.response?.data?.message || 'Không thể xoá sản phẩm' 
+    };
+  }
+};
+
+// Lấy danh sách pizza theo danh mục
+export const getPizzasByCategory = async (categoryId: string) => {
+  try {
+    const response = await api.get<Product[]>(`/products/category/${categoryId}`);
+    return { data: response.data, success: true };
+  } catch (error: any) {
+    return { 
+      success: false,
+      data: [], 
+      message: error.response?.data?.message || 'Không thể lấy danh sách sản phẩm theo danh mục' 
+    };
+  }
+};
+
+// Tìm kiếm pizza
+export const searchPizzas = async (keyword: string) => {
+  try {
+    const response = await api.get<Product[]>(`/products/search?q=${keyword}`);
+    return { data: response.data, success: true };
+  } catch (error: any) {
+    return { 
+      success: false,
+      data: [], 
+      message: error.response?.data?.message || 'Không thể tìm kiếm sản phẩm' 
+    };
+  }
+};
+
+// Upload hình ảnh pizza
+export const uploadPizzaImage = async (id: string, formData: FormData) => {
+  try {
+    const response = await api.post(`/products/${id}/image`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return { data: response.data, success: true };
+  } catch (error: any) {
+    return { 
+      success: false, 
+      message: error.response?.data?.message || 'Không thể tải lên hình ảnh sản phẩm' 
+    };
+  }
+};

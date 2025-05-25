@@ -3,14 +3,15 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { Link, useNavigate } from 'react-router-dom';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
-import { useDispatch, useSelector } from 'react-redux';
-import { register } from '../../redux/thunks/authThunks';
-import { RootState } from '../../redux/store';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { register } from '../../redux/slices/authSlice';
 
 const RegisterSchema = Yup.object().shape({
   name: Yup.string().required('Vui lòng nhập họ tên'),
   email: Yup.string().email('Email không hợp lệ').required('Vui lòng nhập email'),
-  password: Yup.string().min(6, 'Mật khẩu ít nhất 6 ký tự').required('Vui lòng nhập mật khẩu'),
+  password: Yup.string().min(6, 'Mật khẩu ít nhất 6 ký tự').required('Vui lòng nhập mật khẩu').matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, 
+    'Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ cái, số và ký tự đặc biệt'),
+
   confirmPassword: Yup.string()
     .oneOf([Yup.ref('password')], 'Mật khẩu xác nhận không khớp')
     .required('Vui lòng xác nhận mật khẩu'),
@@ -21,35 +22,31 @@ const RegisterForm = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   
-  const { isAuthenticated, loading, error } = useSelector((state: RootState) => state.auth);
+  const { loading, error } = useAppSelector((state) => state.auth);
   
   useEffect(() => {
-    // Nếu đã đăng nhập thì chuyển hướng đến trang chủ
-    if (isAuthenticated) {
-      navigate('/');
-    }
-  }, [isAuthenticated, navigate]);
-
-  useEffect(() => {
-    // Hiển thị lỗi từ Redux state
     if (error) {
       setErrorMessage(error);
     }
   }, [error]);
 
   const handleSubmit = async (values: any, { setSubmitting }: any) => {
-    const { name, email, password, confirmPassword, ...rest } = values;
-    
-    const result = await dispatch(register({ name, email }) as any);
-    setSubmitting(false);
-    
-    if (result.success) {
-      navigate('/');
-    } else {
-      setErrorMessage(result.message);
+    try {
+      setErrorMessage(null);
+      const { name, email, password } = values;
+      
+      const result = await dispatch(register({ name, email, password })).unwrap();
+      
+      if (result) {
+        navigate('/login');
+      }
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Có lỗi xảy ra khi đăng ký');
+    } finally {
+      setSubmitting(false);
     }
   };
 

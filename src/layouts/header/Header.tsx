@@ -7,14 +7,15 @@ import { RootState } from '../../redux/store';
 
 const Header = () => {
   const { theme, toggleTheme } = useTheme();
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth);
+  console.log(user);
 
   return (
     <div className="flex items-center justify-between px-8 py-4 shadow"
       style={{ backgroundColor: theme === 'light' ? '#ffffff' : '#1e1e1e' }}>
       <Link to="/">
         <div className="text-[40px] font-bold cursor-pointer"
-             style={{ color: theme === 'light' ? '#2d2d2d' : '#f5f5f5' }}>
+          style={{ color: theme === 'light' ? '#2d2d2d' : '#f5f5f5' }}>
           DevPizza
         </div>
       </Link>
@@ -30,16 +31,13 @@ const Header = () => {
             <MoonIcon className="w-6 h-6 text-white" />     // 🌙 Tối thì hiện MoonIcon
           )}
         </button>
-        
-        {isAuthenticated && (
-          <Link
-            to="/manager"
-            className="bg-[#14274e] text-white px-4 py-2 rounded hover:bg-[#394867] transition"
-          >
+
+        {isAuthenticated && user?.role === 'admin' && (
+          <Link to="/manager" className="bg-[#14274E] text-white px-4 py-2 rounded-md">
             Manager
           </Link>
         )}
-        
+
         <AuthMenu />
       </div>
     </div>

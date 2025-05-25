@@ -3,10 +3,8 @@ import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 import { Link, useNavigate } from 'react-router-dom';
-import { GoogleLogin } from '@react-oauth/google';
-import { useDispatch, useSelector } from 'react-redux';
-import { login, loginWithGoogle } from '../../redux/thunks/authThunks';
-import { RootState } from '../../redux/store';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { login } from '../../redux/slices/authSlice';
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email('Email không hợp lệ').required('Bắt buộc nhập email'),
@@ -17,45 +15,34 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   
-  const { isAuthenticated, loading, error } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, loading, error } = useAppSelector((state) => state.auth);
   
   useEffect(() => {
-    // Nếu đã đăng nhập thì chuyển hướng đến trang chủ
     if (isAuthenticated) {
       navigate('/');
     }
   }, [isAuthenticated, navigate]);
 
   useEffect(() => {
-    // Hiển thị lỗi từ Redux state
     if (error) {
       setErrorMessage(error);
     }
   }, [error]);
 
   const handleSubmit = async (values: { email: string; password: string }, { setSubmitting }: any) => {
-    const result = await dispatch(login(values.email, values.password) as any);
-    setSubmitting(false);
-    
-    if (result.success) {
-      navigate('/');
-    } else {
-      setErrorMessage(result.message);
-    }
-  };
-
-  const handleGoogleLoginSuccess = async (credentialResponse: any) => {
-    if (credentialResponse.credential) {
-      const result = await dispatch(loginWithGoogle(credentialResponse.credential) as any);
-      
-      if (result.success) {
+    try {
+      setErrorMessage(null);
+      const result = await dispatch(login({ email: values.email, password: values.password })).unwrap();
+      if (result) {
         navigate('/');
-      } else {
-        setErrorMessage(result.message);
       }
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Có lỗi xảy ra khi đăng nhập');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -70,28 +57,6 @@ const LoginForm = () => {
             {errorMessage}
           </div>
         )}
-
-        {/* Login with Google */}
-        <div className="flex justify-center mb-4">
-          <GoogleLogin
-            onSuccess={handleGoogleLoginSuccess}
-            onError={() => setErrorMessage('Đăng nhập Google thất bại')}
-            useOneTap
-            type="standard"
-            theme="filled_blue"
-            shape="rectangular"
-            logo_alignment="center"
-            text="signin_with"
-            locale="vi"
-          />
-        </div>
-
-        {/* Divider */}
-        <div className="flex items-center my-4">
-          <hr className="flex-grow border-gray-300" />
-          <span className="mx-2 text-sm text-gray-400">Hoặc</span>
-          <hr className="flex-grow border-gray-300" />
-        </div>
 
         <Formik
           initialValues={{ email: '', password: '' }}

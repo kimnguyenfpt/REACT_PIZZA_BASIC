@@ -3,17 +3,24 @@ import Category from '../models/Category.model';
 import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/solid';
 import EditCategoryModal from '../modal/EditCategoryModal';
 import AddCategoryModal from '../modal/AddCategoryModal';
-import { useDispatch } from 'react-redux';
-
-import { addCategory, updateCategory, removeCategory } from '../redux/actions/categoryActions';
-import { addCategory as addCategoryAPI, getCategories, deleteCategory as deleteCategoryAPI, updateCategory as updateCategoryAPI } from '../service/categoryService';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
+import {
+  addCategory,
+  updateCategory,
+  removeCategory,
+  setLoading,
+  setError,
+  getCategories
+} from '../redux/slices/categorySlice';
+import { addCategory as addCategoryAPI, getCategories as getCategoriesAPI, deleteCategory as deleteCategoryAPI, updateCategory as updateCategoryAPI } from '../service/categoryService';
 import DeleteModal from '../modal/DeleteModal';
 import { v4 as uuidv4 } from 'uuid';
 
 const ManageCategoriesPage = () => {
   const dispatch = useDispatch();
+  const { categories, loading, error } = useSelector((state: RootState) => state.category);
 
-  const [categories, setCategories] = useState<Category[]>([]);
   const [editing, setEditing] = useState<Category | null>(null);
   const [adding, setAdding] = useState(false);
   const [deleting, setDeleting] = useState<Category | null>(null);
@@ -21,19 +28,22 @@ const ManageCategoriesPage = () => {
     id: '',
     name: '',
     description: '',
-    active: true
+    image: '',
+    active: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   });
-  const [isLoading, setIsLoading] = useState(false);
 
   const fetchCategories = async () => {
     try {
-      setIsLoading(true);
-      const res = await getCategories();
-      setCategories(res.data);
+      dispatch(setLoading(true));
+      const res = await getCategoriesAPI();
+      dispatch(getCategories(res.data));
+      dispatch(setLoading(false));
     } catch (err) {
+      dispatch(setError(err instanceof Error ? err.message : 'Có lỗi xảy ra'));
+      dispatch(setLoading(false));
       console.error('❌ Lỗi khi gọi API:', err);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -48,7 +58,6 @@ const ManageCategoriesPage = () => {
         dispatch(removeCategory(deleting.id));
         console.log('🗑️ Đã xoá danh mục:', deleting);
         setDeleting(null);
-        fetchCategories();
       } catch (error) {
         console.error('❌ Lỗi khi xóa danh mục:', error);
       }
@@ -58,10 +67,11 @@ const ManageCategoriesPage = () => {
   const handleUpdate = async (category: Category) => {
     try {
       const res = await updateCategoryAPI(category);
-      dispatch(updateCategory(res.data));
-      console.log('✅ Cập nhật danh mục thành công:', res.data);
+      if (res.data) {
+        dispatch(updateCategory(res.data));
+        console.log('✅ Cập nhật danh mục thành công:', res.data);
+      }
       setEditing(null);
-      fetchCategories();
     } catch (error) {
       console.error('❌ Lỗi khi cập nhật danh mục:', error);
     }
@@ -71,10 +81,11 @@ const ManageCategoriesPage = () => {
     try {
       const categoryWithId = { ...category, id: uuidv4() };
       const res = await addCategoryAPI(categoryWithId);
-      dispatch(addCategory(res.data));
-      console.log('✅ Thêm danh mục thành công:', res.data);
+      if (res.data) {
+        dispatch(addCategory(res.data));
+        console.log('✅ Thêm danh mục thành công:', res.data);
+      }
       setAdding(false);
-      fetchCategories();
     } catch (error) {
       console.error('❌ Lỗi khi thêm danh mục:', error);
     }
@@ -90,7 +101,10 @@ const ManageCategoriesPage = () => {
               id: '',
               name: '',
               description: '',
-              active: true
+              image: '',
+              active: true,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
             });
             setAdding(true);
           }}
@@ -100,10 +114,12 @@ const ManageCategoriesPage = () => {
         </button>
       </div>
 
-      {isLoading ? (
+      {loading ? (
         <div className="flex justify-center py-10">
           <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#5d3fd3]"></div>
         </div>
+      ) : error ? (
+        <div className="text-red-500 text-center py-4">{error}</div>
       ) : (
         <div className="overflow-x-auto border border-gray-200 rounded-lg shadow dark:border-gray-700">
           <table className="min-w-full text-sm text-left">
@@ -121,22 +137,20 @@ const ManageCategoriesPage = () => {
                 categories.map((category, index) => (
                   <tr
                     key={category.id}
-                    className={`${
-                      index % 2 === 0
+                    className={`${index % 2 === 0
                         ? 'bg-white dark:bg-gray-800'
                         : 'bg-[#f7f3ff] dark:bg-[#2a2a2a]'
-                    } border-b dark:border-gray-700`}
+                      } border-b dark:border-gray-700`}
                   >
                     <td className="px-4 py-3 font-semibold">{index + 1}</td>
                     <td className="px-4 py-3">{category.name}</td>
                     <td className="px-4 py-3">{category.description}</td>
                     <td className="px-4 py-3">
                       <span
-                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          category.active
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${category.active
                             ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                             : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
-                        }`}
+                          }`}
                       >
                         {category.active ? 'Hoạt động' : 'Không hoạt động'}
                       </span>
@@ -190,6 +204,7 @@ const ManageCategoriesPage = () => {
 
       {deleting && (
         <DeleteModal
+          type="danh mục"
           name={deleting.name}
           onClose={() => setDeleting(null)}
           onConfirm={handleDeleteConfirm}

@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../redux/store';
-import { getCategories as getCategoriesAction } from '../redux/actions/categoryActions';
+// import { getCategories as getCategoriesAction } from '../redux/actions/categoryActions';
 import { getCategories } from '../service/categoryService';
+import Category from '../models/Category.model';
 
 const CategoriesPage = () => {
   const dispatch = useDispatch();
@@ -12,7 +13,7 @@ const CategoriesPage = () => {
     const fetchCategories = async () => {
       try {
         const res = await getCategories();
-        dispatch(getCategoriesAction(res.data));
+        // dispatch(getCategoriesAction(res.data));
       } catch (err) {
         console.error('❌ Lỗi khi gọi API danh mục:', err);
       }
@@ -30,7 +31,7 @@ const CategoriesPage = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.filter(cat => cat.active).map((category) => (
+          {categories.filter((cat: Category) => cat.active).map((category: Category) => (
             <div 
               key={category.id} 
               className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700"

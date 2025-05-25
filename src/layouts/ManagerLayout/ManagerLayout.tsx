@@ -15,6 +15,10 @@ const ManagerLayout = () => {
             isActive ? "underline font-semibold" : "hover:underline"}>
             🗂️ Danh mục
           </NavLink>
+          <NavLink to="/manager/users" className={({ isActive }) =>
+            isActive ? "underline font-semibold" : "hover:underline"}>
+            👤 Người dùng
+          </NavLink>
         </nav>
       </aside>
 

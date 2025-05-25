@@ -7,29 +7,40 @@ import { useDispatch } from 'react-redux';
 import Category from '../models/Category.model';
 import { getCategories } from '../service/categoryService';
 
-import { addPizza, updatePizza, removePizza } from '../redux/actions/productActions';
-import { addPizza as addPizzaAPI, getPizzas, deletePizza as deletePizzaAPI } from '../service/productService';
-import { updatePizza as updatePizzaAPI } from '../service/productService';
+// import { addPizza, updatePizza, removePizza } from '../redux/actions/productActions';
+import { addProduct as addProductAPI, getProducts, deleteProduct as deleteProductAPI } from '../service/productService';
+import { updateProduct as updateProductAPI } from '../service/productService';
 import DeleteModal from '../modal/DeleteModal';
 import { v4 as uuidv4 } from 'uuid';
+import Product from '../models/Product.model';
 
 const ManageProductsPage = () => {
   
   const dispatch = useDispatch();
 
-  const[pizzas, setPizzas]  = useState<Pizza[]>([]);
+  const[products, setProducts]  = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [editing, setEditing] = useState<Pizza | null>(null);
+  const [editing, setEditing] = useState<Product | null>(null);
   const [adding, setAdding] = useState(false);
-  const [deleting, setDeleting] = useState<Pizza | null>(null);
-  const [newPizza, setNewPizza] = useState<Pizza>({ id: uuidv4(), name: '', desc: '', img: '', price: 0 });
+  const [deleting, setDeleting] = useState<Product | null>(null);
+  const [newProduct, setNewProduct] = useState<Product>({
+    id: uuidv4(),
+    name: '',
+    description: '',
+    price: 0,
+    image: '',
+    categoryId: '',
+    active: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  });
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchPizzas = async () => {
     try {
       setIsLoading(true);
-      const res = await getPizzas();
-      setPizzas(res.data);
+      const res = await getProducts();
+      setProducts(res.data);
     } catch (err) {
       console.error('❌ Lỗi khi gọi API:', err);
     } finally {
@@ -51,17 +62,15 @@ const ManageProductsPage = () => {
     fetchCategories();
   }, []);
   
-  const getCategoryName = (categoryId?: string) => {
-    if (!categoryId) return "Chưa phân loại";
-    const category = categories.find(cat => cat.id === categoryId);
-    return category ? category.name : "Chưa phân loại";
+  const getCategoryName = (product: Product) => {
+    return product.category?.name || "Chưa phân loại";
   };
 
   const handleDeleteConfirm = async () => {
     if (deleting) {
       try {
-        await deletePizzaAPI(deleting.id);
-        dispatch(removePizza(deleting.id));
+        await deleteProductAPI(deleting.id);
+        // dispatch(removePizza(deleting.id));
         console.log('🗑️ Đã xoá sản phẩm:', deleting);
         setDeleting(null);
         fetchPizzas();
@@ -72,11 +81,17 @@ const ManageProductsPage = () => {
   };
   
   
-  const handleUpdate = async (pizza: Pizza) => {
+  const handleUpdate = async (product: Product) => {
     try {
-      const res = await updatePizzaAPI(pizza); 
-      dispatch(updatePizza(res.data));
-      console.log('✅ Cập nhật sản phẩm thành công:', res.data);
+      const updatedProduct = {
+        ...product,
+        updatedAt: new Date().toISOString()
+      };
+      const res = await updateProductAPI(updatedProduct);
+      if (res.data) {
+        // dispatch(updatePizza(res.data));
+        console.log('✅ Cập nhật sản phẩm thành công:', res.data);
+      }
       setEditing(null);
       fetchPizzas();
     } catch (error) {
@@ -84,12 +99,20 @@ const ManageProductsPage = () => {
     }
   };
 
-  const handleAdd = async (pizza: Pizza) => {
+  const handleAdd = async (product: Product) => {
     try {
-      const pizzaWithId = { ...pizza, id: uuidv4() };
-      const res = await addPizzaAPI(pizzaWithId);
-      dispatch(addPizza(res.data));
-      console.log('✅ Thêm sản phẩm thành công:', res.data);
+      const productWithId = {
+        ...product,
+        id: uuidv4(),
+        active: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
+      const res = await addProductAPI(productWithId);
+      if (res.data) {
+        // dispatch(addPizza(res.data));
+        console.log('✅ Thêm sản phẩm thành công:', res.data);
+      }
       setAdding(false);
       fetchPizzas();
     } catch (error) {
@@ -129,10 +152,10 @@ const ManageProductsPage = () => {
               </tr>
             </thead>
             <tbody>
-              {pizzas.length > 0 ? (
-                pizzas.map((pizza, index) => (
+              {products.length > 0 ? (
+                products.map((product, index) => (
                   <tr
-                    key={pizza.id}
+                    key={product.id}
                     className={`${
                       index % 2 === 0
                         ? 'bg-white dark:bg-gray-800'
@@ -140,24 +163,24 @@ const ManageProductsPage = () => {
                     } border-b dark:border-gray-700`}
                   >
                     <td className="px-4 py-3 font-semibold">{index + 1}</td>
-                    <td className="px-4 py-3">{pizza.name}</td>
-                    <td className="px-4 py-3">{pizza.desc}</td>
+                    <td className="px-4 py-3">{product.name}</td>
+                    <td className="px-4 py-3">{product.description}</td>
                     <td className="px-4 py-3">
                       <span className="inline-block px-2 py-1 text-xs text-blue-800 bg-blue-100 rounded dark:bg-blue-900 dark:text-blue-300">
-                        {getCategoryName(pizza.categoryId)}
+                        {getCategoryName(product)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-bold text-red-500">{pizza.price.toLocaleString()}₫</td>
+                    <td className="px-4 py-3 font-bold text-red-500">{product.price.toLocaleString()}₫</td>
                     <td className="flex justify-center gap-2 px-4 py-3">
                       <button
-                        onClick={() => setEditing(pizza)}
+                        onClick={() => setEditing(product)}
                         className="flex items-center gap-1 px-3 py-1 text-white bg-purple-600 rounded hover:bg-purple-700"
                       >
                         <PencilSquareIcon className="w-4 h-4" />
                         Edit
                       </button>
                       <button
-                        onClick={() => setDeleting(pizza)}
+                        onClick={() => setDeleting(product)}
                         className="flex items-center gap-1 px-3 py-1 text-white bg-red-600 rounded hover:bg-red-700"
                       >
                         <TrashIcon className="w-4 h-4" />
@@ -180,8 +203,8 @@ const ManageProductsPage = () => {
 
       {adding && (
         <AddModal
-          newPizza={newPizza}
-          onChange={setNewPizza}
+          newProduct={newProduct}
+          onChange={setNewProduct}
           onClose={() => setAdding(false)}
           onAdd={handleAdd}
         />
@@ -189,7 +212,7 @@ const ManageProductsPage = () => {
 
       {editing && (
         <EditModal
-          pizza={editing}
+          product={editing}
           onSave={handleUpdate}
           onClose={() => setEditing(null)}
         />
@@ -197,6 +220,7 @@ const ManageProductsPage = () => {
 
       {deleting && (
         <DeleteModal
+          type="sản phẩm"
           name={deleting.name}
           onClose={() => setDeleting(null)}
           onConfirm={handleDeleteConfirm}

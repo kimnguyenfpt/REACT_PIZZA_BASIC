@@ -10,6 +10,7 @@ import CategoriesPage from '../pages/CategoriesPage';
 import LoginForm from '../auth/login/Login';
 import RegisterForm from '../auth/register/Register';
 import ProtectedRoute from './ProtectedRoute';
+import ManagerUser from '../managerUser/ManagerUser';
 
 const Layout = () => (
   <div>
@@ -53,6 +54,10 @@ const Router = () => {
                 },
                 { path: 'categories', 
                   element: <ManageCategoriesPage /> 
+                },
+                {
+                  path: 'users',
+                  element: <ManagerUser />
                 },
                 { index: true, 
                   element: <div>📌 Chọn chức năng bên trái để quản lý</div> 

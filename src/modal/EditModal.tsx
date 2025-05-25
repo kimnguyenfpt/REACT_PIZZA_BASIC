@@ -1,17 +1,17 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
-import Pizza from '../models/Pizzza.model';
+import Product from '../models/Product.model';
 import { useState, useEffect } from 'react';
 import { getCategories } from '../service/categoryService';
 import Category from '../models/Category.model';
 
 type Props = {
-  pizza: Pizza;
+  product: Product;
   onClose: () => void;
-  onSave: (updated: Pizza) => void;
+  onSave: (updated: Product) => void;
 };
 
-const EditModal = ({ pizza, onClose, onSave }: Props) => {
-  const [editedPizza, setEditedPizza] = useState<Pizza>({...pizza});
+const EditModal = ({ product, onClose, onSave }: Props) => {
+  const [editedProduct, setEditedProduct] = useState<Product>({...product});
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   
@@ -20,7 +20,9 @@ const EditModal = ({ pizza, onClose, onSave }: Props) => {
       try {
         setLoading(true);
         const res = await getCategories();
-        setCategories(res.data);
+        if (res.success) {
+          setCategories(res.data);
+        }
       } catch (error) {
         console.error('❌ Lỗi khi lấy danh mục:', error);
       } finally {
@@ -31,13 +33,12 @@ const EditModal = ({ pizza, onClose, onSave }: Props) => {
     fetchCategories();
   }, []);
   
-  const handleChange = (key: keyof Pizza, value: string | number) => {
-    setEditedPizza(prev => ({ ...prev, [key]: value }));
+  const handleChange = (key: keyof Product, value: string | number | boolean) => {
+    setEditedProduct(prev => ({ ...prev, [key]: value }));
   };
 
   const handleSave = () => {
-    onSave(editedPizza);
-    console.log('✅ Sửa sản phẩm thành công:', editedPizza);
+    onSave(editedProduct);
   };
 
   return (
@@ -49,24 +50,31 @@ const EditModal = ({ pizza, onClose, onSave }: Props) => {
         <h3 className="text-xl font-bold">✏️ Sửa sản phẩm</h3>
         <input
           type="text"
-          value={editedPizza.name}
+          value={editedProduct.name}
           onChange={e => handleChange('name', e.target.value)}
           className="w-full p-2 rounded border dark:bg-[#1e1e1e] dark:text-white"
           placeholder="Tên sản phẩm"
         />
         <input
           type="text"
-          value={editedPizza.desc}
-          onChange={e => handleChange('desc', e.target.value)}
+          value={editedProduct.description}
+          onChange={e => handleChange('description', e.target.value)}
           className="w-full p-2 rounded border dark:bg-[#1e1e1e] dark:text-white"
           placeholder="Mô tả"
         />
         <input
           type="number"
-          value={editedPizza.price}
+          value={editedProduct.price}
           onChange={e => handleChange('price', parseInt(e.target.value || '0'))}
           className="w-full p-2 rounded border dark:bg-[#1e1e1e] dark:text-white"
           placeholder="Giá"
+        />
+        <input
+          type="text"
+          value={editedProduct.image}
+          onChange={e => handleChange('image', e.target.value)}
+          className="w-full p-2 rounded border dark:bg-[#1e1e1e] dark:text-white"
+          placeholder="URL hình ảnh"
         />
         
         <div>
@@ -74,18 +82,35 @@ const EditModal = ({ pizza, onClose, onSave }: Props) => {
             Danh mục
           </label>
           <select
-            value={editedPizza.categoryId || ''}
+            value={editedProduct.categoryId || ''}
             onChange={e => handleChange('categoryId', e.target.value)}
             className="w-full p-2 rounded border dark:bg-[#1e1e1e] dark:text-white"
             disabled={loading}
           >
             <option value="">-- Chọn danh mục --</option>
-            {categories.filter(cat => cat.active).map(category => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
+            {loading ? (
+              <option disabled>Đang tải danh mục...</option>
+            ) : (
+              categories.map(category => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))
+            )}
           </select>
+        </div>
+
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            id="active"
+            checked={editedProduct.active}
+            onChange={e => handleChange('active', e.target.checked)}
+            className="w-4 h-4 mr-2"
+          />
+          <label htmlFor="active" className="text-sm text-gray-700 dark:text-gray-300">
+            Kích hoạt
+          </label>
         </div>
         
         <button

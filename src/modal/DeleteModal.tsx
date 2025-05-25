@@ -1,12 +1,13 @@
 import { XMarkIcon } from '@heroicons/react/24/outline';
 
 type Props = {
-  name: string;
+  type: string;     // ví dụ: 'sản phẩm', 'danh mục', 'người dùng'
+  name: string;     // tên cụ thể của đối tượng cần xoá
   onClose: () => void;
   onConfirm: () => void;
 };
 
-const DeleteModal = ({ name, onClose, onConfirm }: Props) => {
+const DeleteModal = ({ type, name, onClose, onConfirm }: Props) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
       <div className="bg-white dark:bg-[#2e2e2e] p-6 rounded-xl w-[90%] max-w-sm space-y-4 relative">
@@ -15,10 +16,10 @@ const DeleteModal = ({ name, onClose, onConfirm }: Props) => {
         </button>
 
         <h3 className="text-lg font-bold text-red-600 dark:text-red-400">
-          ⚠️ Xác nhận xoá
+          ⚠️ Xác nhận xoá {type}
         </h3>
         <p className="text-sm dark:text-gray-300">
-          Bạn có chắc chắn muốn xoá sản phẩm <strong>{name}</strong>?
+          Bạn có chắc chắn muốn xoá {type} <strong>{name}</strong>?
         </p>
 
         <div className="flex justify-end gap-3 pt-4">

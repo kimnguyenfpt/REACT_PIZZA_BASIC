@@ -1,21 +1,19 @@
-import { createStore, combineReducers, compose, applyMiddleware } from 'redux';
-import productReducer from './reducers/productReducer';
-import categoryReducer from './reducers/categoryReducer';
-import authReducer from './reducers/authReducer';
-import { thunk } from 'redux-thunk';
+import { configureStore } from "@reduxjs/toolkit";
+import productReducer from "./slices/productSlice";
+import categoryReducer from "./slices/categorySlice";
+import authReducer from "./slices/authSlice";
 
-const rootReducer = combineReducers({
-  product: productReducer,
-  category: categoryReducer,
-  auth: authReducer,
+export const store = configureStore({
+  reducer: {
+    product: productReducer,
+    category: categoryReducer,
+    auth: authReducer
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }),
 });
 
-const composeEnhancers = (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-
-const store = createStore(
-  rootReducer,
-  composeEnhancers(applyMiddleware(thunk))
-);
-
-export type RootState = ReturnType<typeof rootReducer>;
-export default store;
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;

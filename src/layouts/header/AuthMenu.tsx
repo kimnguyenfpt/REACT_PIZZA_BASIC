@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../../redux/store';
-import { logout } from '../../redux/thunks/authThunks';
+import { logout } from '../../redux/slices/authSlice';
 import { UserIcon, ArrowRightOnRectangleIcon, Cog6ToothIcon } from '@heroicons/react/24/outline';
 
 const AuthMenu = () => {
@@ -13,23 +13,24 @@ const AuthMenu = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Click outside to close menu
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
-  const handleLogout = () => {
-    dispatch(logout() as any);
-    navigate('/login');
-    setIsOpen(false);
+  const handleLogout = async () => {
+    try {
+      dispatch(logout());
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   if (!isAuthenticated) {
@@ -104,4 +105,4 @@ const AuthMenu = () => {
   );
 };
 
-export default AuthMenu; 
+export default AuthMenu;
